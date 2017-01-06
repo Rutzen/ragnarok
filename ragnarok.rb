@@ -6,7 +6,7 @@ counter = 0
 @array = []
 @vencimentos = []
 
-@ragnarok = {}
+@ragnarok = []
 
 # inserts domains line by line into the empty array
 File.open("domains_string.txt", "r") do |infile|
@@ -36,44 +36,51 @@ end
 @array.each do |item|
 	good_item = item.gsub("\s","").gsub("\r\n","")
 	ready = Whois.whois(good_item).parser
-	if ready.expires_on.nil?
+	if ready.expires_on.nil? 
 		next
 	end
+	#if 
+	#	ready.technical_contacts == ORDIG3
+	#	next
+	#end
 		hash = {
 		quem: good_item,
 		vencimento: ready.expires_on
 		}
 		agora = DateTime.now
-		vencimento = hash[:vencimento].to_datetime
-			require 'pry'; binding.pry;
-			if vencimento < agora
-				@ragnarok = item
-			end	
-		end
-		
-@ragnarok.each do |item|
+		vencimento = hash[:vencimento]
+			if agora.to_date < vencimento.to_date
+				days = vencimento.to_date - agora.to_date
+				if days < 3
+			   @ragnarok << item 
+				end
 		require 'pry'; binding.pry;
-	message = <<MESSAGE_END
-	De: Pietro Rutzen <pietro.rutzen@organicadigital.com>
-	Para: A Test User <emaildocliente@todomain.com>,<emailxikaos@
-	Assunto: Seu domínio está próximo da data de vencimento!
-	Olá!
-
-	Tudo certo?
-
-	Gostaria de lembrar que é importante que seja feita a renovação de seu domínio!
-	
-	MESSAGE_END
-
-	Net::SMTP.start('localhost') do |smtp|
-		smtp.send_message message, 
-		'pietro.rutzen@organicadigital.com',
-		item.admin_contacts.to_s
-	end
+			end
 end
 
+		puts "oi"
+		
+#@ragnarok.each do |item|
+#	message = <<MESSAGE_END
+#	De: Pietro Rutzen <pietro.rutzen@organicadigital.com>
+#	Para: A Test User <lucas.mello@organicadigital.com>,
+#	Assunto: Seu domínio está próximo da data de vencimento!
+#	Olá!
+#
+#	Tudo certo?
+#	Gostaria de lembrar que é importante que seja feita a renovação de seu domínio!
+#	
+#	MESSAGE_END
+#
+#	Net::SMTP.start('localhost') do |smtp|
+#		smtp.send_message message, 
+#		'pietro.rutzen@organicadigital.com',
+#		item.admin_contacts.to_s
+#	end
+#end
 
-puts "llamas and lions"
+
+#puts "llamas and lions"
 
 
 
